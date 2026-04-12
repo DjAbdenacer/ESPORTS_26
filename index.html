@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>TechFix Pro</title>
+<style>
+@font-face{font-family:'Cairo';src:local('Cairo'),local('Cairo-Regular');font-weight:400}
+@font-face{font-family:'Cairo';src:local('Cairo Bold'),local('Cairo-Bold');font-weight:700}
+@font-face{font-family:'Cairo';src:local('Cairo ExtraBold'),local('Cairo-ExtraBold');font-weight:800}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0F0F1A;--surf:#16162A;--card:#1E1E35;--bor:#2A2A45;
+  --acc:#6C63FF;--accL:#8B85FF;--grn:#10B981;--yel:#F59E0B;
+  --red:#EF4444;--blu:#3B82F6;--txt:#E2E8F0;--mut:#8892A4;--inp:#12121F;
+}
+body{font-family:'Cairo','Segoe UI','Tahoma',sans-serif;direction:rtl;background:var(--bg);color:var(--txt);min-height:100vh}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--surf)}::-webkit-scrollbar-thumb{background:var(--bor);border-radius:3px}
+input,select,textarea{font-family:'Cairo','Segoe UI','Tahoma',sans-serif;direction:rtl}
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastPop{from{opacity:0;transform:translateX(-50%) translateY(16px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.fadeUp{animation:fadeUp .3s ease}
+/* LAYOUT */
+.app{display:flex;min-height:100vh}
+/* SIDEBAR */
+.sb{width:228px;background:var(--surf);border-left:1px solid var(--bor);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-logo{padding:20px 18px;border-bottom:1px solid var(--bor)}
+.sb-logo-title{font-size:17px;font-weight:800;color:var(--acc)}
+.sb-logo-sub{font-size:11px;color:var(--mut);margin-top:2px}
+.nav{padding:10px 0;flex:1}
+.ni{display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;border-right:3px solid transparent;color:var(--mut);font-size:13px;font-weight:400;transition:all .15s;user-select:none}
+.ni:hover{background:rgba(108,99,255,.09);color:var(--accL)}
+.ni.on{background:rgba(108,99,255,.14);border-right-color:var(--acc);color:var(--accL);font-weight:700}
+.ni-ic{font-size:17px;flex-shrink:0}
+.ni-badge{margin-right:auto;background:var(--red);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700}
+.sb-user{padding:12px 14px;border-top:1px solid var(--bor);margin-top:auto}
+.sb-user-inner{background:rgba(108,99,255,.1);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:9px}
+.sb-avatar{width:32px;height:32px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.sb-uname{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-urole{font-size:10px;color:var(--mut)}
+.sb-logout{background:none;border:none;cursor:pointer;font-size:14px;color:var(--mut);padding:2px;margin-right:auto}
+.sb-footer{padding:8px 14px 12px;text-align:center}
+.offline-tag{background:rgba(16,185,129,.12);color:var(--grn);border-radius:16px;padding:3px 10px;font-size:10px;font-weight:700}
+/* MAIN */
+.main{flex:1;padding:24px;overflow:auto;min-width:0}
+/* PAGE */
+.pg{display:none}.pg.on{display:block;animation:fadeUp .3s ease}
+/* CARD */
+.card{background:var(--card);border:1px solid var(--bor);border-radius:14px;padding:20px;transition:border-color .2s}
+/* BUTTONS */
+.btn{border:none;color:var(--txt);border-radius:10px;font-family:'Cairo','Segoe UI',sans-serif;font-weight:700;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px;padding:10px 20px;font-size:13px;white-space:nowrap}
+.btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn-acc{background:var(--acc)}
+.btn-grn{background:var(--grn)}
+.btn-red{background:var(--red)}
+.btn-yel{background:var(--yel);color:#111}
+.btn-wa{background:#25D366}
+.btn-ghost{background:transparent;border:1px solid var(--bor)}
+.btn-sm{padding:6px 13px;font-size:12px;border-radius:8px}
+.btn-lg{padding:13px 26px;font-size:15px}
+/* FORM */
+.fg{margin-bottom:13px}
+.fl{display:block;font-size:12px;color:var(--mut);margin-bottom:5px;font-weight:600}
+.fi{width:100%;background:var(--inp);border:1px solid var(--bor);border-radius:8px;padding:10px 13px;color:var(--txt);font-size:13px;outline:none;transition:border-color .2s;font-family:'Cairo','Segoe UI',sans-serif}
+.fi:focus{border-color:var(--acc)}
+textarea.fi{height:82px;resize:vertical}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+/* MODAL */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.76);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px}
+.mb{background:var(--card);border:1px solid var(--bor);border-radius:16px;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;animation:slideUp .22s ease}
+.mh{padding:18px 22px;border-bottom:1px solid var(--bor);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--card);z-index:2}
+.mh-title{font-weight:800;font-size:17px}
+.mbody{padding:22px}
+.mf{padding:14px 22px;border-top:1px solid var(--bor);display:flex;justify-content:space-between;align-items:center;position:sticky;bottom:0;background:var(--card)}
+/* STEPS */
+.steps{display:flex;gap:7px}
+.step{width:30px;height:30px;border-radius:50%;background:var(--bor);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.step.on{background:var(--acc)}
+.step.done{background:var(--grn)}
+/* BADGE */
+.badge{padding:3px 11px;border-radius:16px;font-size:11px;font-weight:700;white-space:nowrap}
+.b-rep{background:#FEF3C7;color:#92400E}
+.b-wait{background:#DBEAFE;color:#1E40AF}
+.b-done{background:#D1FAE5;color:#065F46}
+.b-fail{background:#FEE2E2;color:#991B1B}
+/* STAT CARDS */
+.stats-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+.sc{flex:1;min-width:155px}
+.sc-val{font-size:24px;font-weight:800;font-family:'Courier New',monospace;margin:8px 0 3px}
+.sc-lbl{font-size:12px;color:var(--mut)}
+.sc-sub{border-radius:7px;padding:4px 9px;font-size:11px;font-weight:700}
+/* FAULT CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+.chip{padding:7px 14px;border-radius:18px;border:2px solid var(--bor);background:transparent;cursor:pointer;font-size:13px;font-weight:600;transition:all .14s;color:var(--txt);font-family:'Cairo','Segoe UI',sans-serif}
+.chip.on{border-color:var(--acc);background:rgba(108,99,255,.14);color:var(--accL)}
+/* SUMMARY BOX */
+.sum-box{background:var(--inp);border-radius:10px;padding:14px;margin-top:8px}
+.sum-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.sum-item{text-align:center}
+.sum-label{font-size:10px;color:var(--mut)}
+.sum-val{font-size:17px;font-weight:800;font-family:'Courier New',monospace}
+.sum-total{text-align:center;border-top:1px solid var(--bor);padding-top:9px;font-size:18px;font-weight:800;font-family:'Courier New',monospace}
+/* PART ROW */
+.prow{background:var(--inp);border-radius:9px;padding:11px;margin-bottom:7px;border:1px solid var(--bor)}
+.prow-g{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:7px;align-items:end}
+.pl{font-size:10px;color:var(--mut);display:block;margin-bottom:3px}
+.pi{width:100%;background:var(--bg);border:1px solid var(--bor);border-radius:6px;padding:7px 9px;color:var(--txt);font-size:12px;outline:none;font-family:'Cairo','Segoe UI',sans-serif}
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);color:#fff;padding:11px 26px;border-radius:12px;font-weight:700;z-index:9999;animation:toastPop .3s ease;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+/* SEARCH */
+.search{width:100%;background:var(--card);border:1px solid var(--bor);border-radius:10px;padding:10px 14px;color:var(--txt);font-size:13px;outline:none;font-family:'Cairo','Segoe UI',sans-serif}
+.search:focus{border-color:var(--acc)}
+/* ROW ITEM */
+.ri{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bor)}
+.ri:last-child{border-bottom:none}
+/* PROGRESS */
+.prog-wrap{background:var(--bor);border-radius:4px;height:7px;margin-top:4px}
+.prog-bar{background:var(--acc);border-radius:4px;height:7px;transition:width .5s ease}
+/* SECTION HEADER */
+.sec-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.sec-title{font-size:21px;font-weight:800}
+/* DEVICE CARD */
+.dc{margin-bottom:11px}
+.dc-meta{display:flex;gap:14px;font-size:12px;color:var(--mut);flex-wrap:wrap;margin-top:6px}
+/* STATUS FILTER */
+.filters{display:flex;gap:7px;flex-wrap:wrap}
+/* RANK CIRCLE */
+.rank{background:var(--acc);color:#fff;width:27px;height:27px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+/* CUST TAG */
+.ctag{background:var(--bor);padding:2px 9px;border-radius:10px;font-size:10px;color:var(--mut)}
+/* MONO */
+.mono{font-family:'Courier New',monospace}
+/* LOW BADGE */
+.low{background:rgba(239,68,68,.14);color:var(--red);padding:3px 10px;border-radius:14px;font-size:11px;font-weight:700}
+/* ALERT CARDS */
+.ac-err{border-color:rgba(239,68,68,.4)!important}
+.ac-warn{border-color:rgba(245,158,11,.4)!important}
+/* LOGIN */
+.login-wrap{position:fixed;inset:0;background:var(--bg);z-index:8000;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-box{background:var(--card);border:1px solid var(--bor);border-radius:20px;padding:40px 36px;width:100%;max-width:390px;animation:slideUp .3s ease}
+.login-logo{text-align:center;margin-bottom:30px}
+.login-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red);border-radius:9px;padding:9px 13px;font-size:13px;margin-bottom:12px;display:none}
+.eye-wrap{position:relative}
+.eye-wrap .fi{padding-left:38px}
+.eye-btn{position:absolute;left:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:14px;color:var(--mut);padding:3px}
+/* INVOICE */
+.inv-wrap{padding:26px}
+.inv-hdr{text-align:center;border-bottom:2px dashed var(--bor);padding-bottom:18px;margin-bottom:16px}
+.inv-g{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.inv-lbl{font-size:11px;color:var(--mut)}
+.inv-val{font-weight:700;font-size:13px}
+.inv-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bor);font-size:13px}
+.inv-total{display:flex;justify-content:space-between;padding:11px 0;font-size:19px;font-weight:800;color:var(--acc)}
+.inv-warn{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:9px;padding:10px;margin-top:10px;font-size:11px;color:var(--mut);text-align:center}
+/* TICKET */
+.tkt-outer{padding:24px}
+.tkt-paper{background:#fff;color:#111;border-radius:14px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.35);font-family:Tahoma,'Segoe UI',Arial,sans-serif}
+.tkt-top{background:linear-gradient(135deg,#6C63FF 0%,#4F46E5 100%);color:#fff;padding:22px 20px 18px;text-align:center}
+.tkt-shop-name{font-size:20px;font-weight:800;letter-spacing:.5px}
+.tkt-shop-info{font-size:12px;opacity:.85;margin-top:4px}
+.tkt-num-box{background:rgba(255,255,255,.18);border-radius:12px;padding:10px 20px;margin-top:14px;display:inline-block}
+.tkt-num-lbl{font-size:10px;opacity:.8;text-transform:uppercase;letter-spacing:1px}
+.tkt-num-val{font-size:26px;font-weight:800;font-family:'Courier New',monospace;letter-spacing:3px;margin-top:2px}
+.tkt-mid{padding:18px 20px}
+.tkt-row{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px dashed #e5e7eb;gap:10px;font-size:13px}
+.tkt-row:last-child{border-bottom:none}
+.tkt-k{color:#6b7280;font-size:11px;min-width:90px;flex-shrink:0;padding-top:1px}
+.tkt-v{font-weight:700;color:#111;text-align:left;flex:1}
+.tkt-status{display:inline-block;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700}
+.tkt-bottom{background:#f9fafb;border-top:1px solid #e5e7eb;padding:14px 20px;text-align:center}
+.tkt-warn-txt{font-size:10px;color:#9ca3af;line-height:1.7}
+.tkt-cut{border-top:2px dashed #d1d5db;margin:0 20px 0;position:relative}
+.tkt-cut::before{content:'✂';position:absolute;top:-11px;right:-6px;font-size:16px;color:#d1d5db;background:#fff}
+.tkt-actions{padding:18px 20px 20px;display:flex;gap:9px}
+.tkt-wrap{padding:26px}
+.tkt-hdr{text-align:center;padding-bottom:16px;margin-bottom:14px;border-bottom:3px dashed var(--bor)}
+.tkt-shop{font-size:19px;font-weight:800;color:var(--acc)}
+.tkt-info{font-size:12px;color:var(--mut);margin-top:3px}
+.tkt-num{display:inline-block;background:var(--acc);color:#fff;font-size:21px;font-weight:800;padding:5px 22px;border-radius:24px;font-family:'Courier New',monospace;letter-spacing:2px;margin:10px 0 3px}
+.tkt-num-lbl2{font-size:10px;color:var(--mut)}
+.tkt-body{background:var(--inp);border-radius:11px;padding:14px;margin-bottom:12px}
+.tkt-warn{font-size:10px;color:var(--mut);text-align:center;border-top:2px dashed var(--bor);padding-top:11px;line-height:1.7}
+/* ACCENT BOX */
+.acc-box{background:rgba(108,99,255,.07);border:1px solid rgba(108,99,255,.18);border-radius:11px;padding:15px;margin-top:14px}
+/* COLORS */
+.c-grn{color:var(--grn)}.c-red{color:var(--red)}.c-acc{color:var(--acc)}.c-yel{color:var(--yel)}.c-blu{color:var(--blu)}.c-mut{color:var(--mut)}
+.fw8{font-weight:800}
+/* PRINT */
+@media print{
+  body > *{display:none!important}
+  #PRINT_FRAME{display:block!important}
+  #PRINT_FRAME > div{position:static!important}
+  #PRINT_FRAME button{display:none!important}
+}
+@media(max-width:720px){
+  .sb{width:54px}.sb-logo-title,.sb-logo-sub,.ni span:not(.ni-ic),.sb-uname,.sb-urole,.sb-logout,.sb-footer,.offline-tag{display:none}
+  .g2{grid-template-columns:1fr}.g3{grid-template-columns:1fr}
+  .stats-row{flex-direction:column}
+  .prow-g{grid-template-columns:1fr 1fr;gap:6px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div id="TOAST" class="toast" style="display:none"></div>
+
+<!-- ===== LOGIN ===== -->
+<div id="LOGIN" class="login-wrap">
+  <div class="login-box" id="LOGIN_BOX">
+    <div class="login-logo">
+      <div style="font-size:54px;margin-bottom:10px">🔧</div>
+      <div style="font-size:22px;font-weight:800;color:var(--acc)" id="L_SHOP">TechFix Pro</div>
+      <div style="font-size:12px;color:var(--mut);margin-top:3px">نظام إدارة محل التصليح</div>
+    </div>
+    <div id="L_ERR" class="login-err"></div>
+    <div class="fg">
+      <label class="fl">👤 اسم المستخدم</label>
+      <input class="fi" id="L_USER" type="text" placeholder="أدخل اسم المستخدم" dir="ltr" onkeydown="if(e.key==='Enter')$id('L_PASS').focus()" autocomplete="username"/>
+    </div>
+    <div class="fg">
+      <label class="fl">🔑 كلمة المرور</label>
+      <div class="eye-wrap">
+        <input class="fi" id="L_PASS" type="password" placeholder="أدخل كلمة المرور" dir="ltr" onkeydown="if(event.key==='Enter')doLogin()" autocomplete="current-password"/>
+        <button class="eye-btn" onclick="toggleEye('L_PASS',this)">👁️</button>
+      </div>
+    </div>
+    <button class="btn btn-acc btn-lg" style="width:100%;justify-content:center;margin-top:6px;border-radius:12px" onclick="doLogin()">🔓 دخول</button>
+    <div style="text-align:center;margin-top:16px;font-size:11px;color:var(--mut)">● يعمل بدون إنترنت — بياناتك محفوظة محلياً</div>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- DEVICE FORM -->
+<div id="M_DEV" class="ov" style="display:none">
+  <div class="mb">
+    <div class="mh">
+      <span class="mh-title" id="M_DEV_TITLE">📱 تسجيل جهاز جديد</span>
+      <div class="steps">
+        <div class="step on" id="SD1" onclick="gStep(1)">1</div>
+        <div class="step" id="SD2" onclick="gStep(2)">2</div>
+        <div class="step" id="SD3" onclick="gStep(3)">3</div>
+      </div>
+    </div>
+    <div class="mbody">
+      <!-- S1: CLIENT + DEVICE -->
+      <div id="SC1">
+        <div style="font-weight:700;color:var(--accL);margin-bottom:14px">👤 معلومات العميل</div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <button class="btn btn-acc btn-sm" id="BNC" onclick="setCMode('new')">عميل جديد</button>
+          <button class="btn btn-ghost btn-sm" id="BEC" onclick="setCMode('exist')">عميل موجود</button>
+        </div>
+        <div id="NEW_C">
+          <div class="g2">
+            <div class="fg"><label class="fl">الاسم *</label><input class="fi" id="F_CN" placeholder="الاسم الكامل"/></div>
+            <div class="fg"><label class="fl">رقم الهاتف *</label><input class="fi" id="F_CP" placeholder="05XXXXXXXX"/></div>
+            <div class="fg" style="grid-column:1/-1"><label class="fl">البريد الإلكتروني</label><input class="fi" id="F_CE" placeholder="اختياري"/></div>
+          </div>
+        </div>
+        <div id="EXIST_C" style="display:none">
+          <div class="fg"><label class="fl">اختر عميل</label><select class="fi" id="F_CS"><option value="">-- اختر --</option></select></div>
+        </div>
+        <div style="font-weight:700;color:var(--accL);margin:14px 0 11px">📱 معلومات الجهاز</div>
+        <div class="g2">
+          <div class="fg"><label class="fl">النوع *</label>
+            <select class="fi" id="F_DT">
+              <option>Samsung</option><option selected>iPhone</option><option>Xiaomi</option><option>Huawei</option><option>Oppo</option><option>Vivo</option><option>Realme</option><option>Nokia</option><option>LG</option><option>Sony</option><option>Other</option>
+            </select>
+          </div>
+          <div class="fg"><label class="fl">الموديل *</label><input class="fi" id="F_DM" placeholder="iPhone 11 / Galaxy S21"/></div>
+          <div class="fg"><label class="fl">اللون</label><input class="fi" id="F_DC" placeholder="أسود / أبيض..."/></div>
+          <div class="fg"><label class="fl">IMEI / Serial *</label><input class="fi mono" id="F_DI" placeholder="15 رقم" maxlength="20"/></div>
+        </div>
+      </div>
+      <!-- S2: FAULTS + PARTS -->
+      <div id="SC2" style="display:none">
+        <div style="font-weight:700;color:var(--accL);margin-bottom:12px">🔧 الأعطال</div>
+        <div class="chips" id="CHIPS"></div>
+        <div class="fg"><label class="fl">ملاحظات إضافية</label><textarea class="fi" id="F_NO" placeholder="تفاصيل العطل..."></textarea></div>
+        <div style="font-weight:700;color:var(--accL);margin-bottom:10px">🧩 القطع المستعملة</div>
+        <div id="PARTS_LIST"></div>
+        <button class="btn btn-ghost btn-sm" onclick="addPart()" style="margin-bottom:14px">+ إضافة قطعة</button>
+        <div class="fg"><label class="fl">تكلفة الخدمة (DA)</label><input class="fi mono" id="F_SV" type="number" value="0" oninput="calcSum()"/></div>
+        <div class="sum-box">
+          <div class="sum-grid">
+            <div class="sum-item"><div class="sum-label">إجمالي القطع</div><div class="sum-val c-blu" id="S_PARTS">0</div></div>
+            <div class="sum-item"><div class="sum-label">تكلفة الشراء</div><div class="sum-val c-mut" id="S_COST">0</div></div>
+            <div class="sum-item"><div class="sum-label">الربح</div><div class="sum-val" id="S_PROF">0</div></div>
+          </div>
+          <div class="sum-total">المجموع: <span class="c-acc" id="S_TOTAL">0 DA</span></div>
+        </div>
+      </div>
+      <!-- S3: DETAILS -->
+      <div id="SC3" style="display:none">
+        <div style="font-weight:700;color:var(--accL);margin-bottom:14px">⚙️ تفاصيل الإصلاح</div>
+        <div class="g2">
+          <div class="fg"><label class="fl">الحالة</label>
+            <select class="fi" id="F_ST">
+              <option value="rep">🔧 قيد الإصلاح</option>
+              <option value="wait">⏳ انتظار قطع</option>
+              <option value="done">✅ تم الإصلاح</option>
+              <option value="fail">❌ غير قابل للإصلاح</option>
+            </select>
+          </div>
+          <div class="fg"><label class="fl">الفني المسؤول</label><select class="fi" id="F_TK"></select></div>
+          <div class="fg"><label class="fl">تاريخ الاستلام</label><input class="fi" type="date" id="F_RD"/></div>
+          <div class="fg"><label class="fl">تاريخ التسليم المتوقع</label><input class="fi" type="date" id="F_DD"/></div>
+        </div>
+        <div class="acc-box" id="S3_SUM"></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-ghost" id="M_BACK" onclick="stepBack()">إلغاء</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-acc" id="M_NEXT" onclick="stepNext()">التالي →</button>
+        <button class="btn btn-grn" id="M_SAVE" style="display:none" onclick="saveDevice()">💾 حفظ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INVOICE MODAL -->
+<div id="M_INV" class="ov" style="display:none" onclick="if(event.target===this)cls('M_INV')">
+  <div class="mb" style="max-width:500px"><div class="inv-wrap" id="INV_BODY"></div></div>
+</div>
+
+<!-- TICKET MODAL -->
+<div id="M_TKT" class="ov" style="display:none" onclick="if(event.target===this)cls('M_TKT')">
+  <div class="mb" style="max-width:430px;background:var(--bg);border:none;border-radius:18px">
+    <div id="TKT_BODY"></div>
+  </div>
+</div>
+
+<!-- PRINT FRAME (hidden) -->
+<div id="PRINT_FRAME" style="display:none"></div>
+
+<!-- SETTINGS MODAL -->
+<div id="M_SET" class="ov" style="display:none" onclick="if(event.target===this)cls('M_SET')">
+  <div class="mb" style="max-width:460px">
+    <div class="mh"><span class="mh-title">⚙️ إعدادات المحل</span><button class="btn btn-ghost btn-sm" onclick="cls('M_SET')">✕</button></div>
+    <div class="mbody">
+      <div class="fg"><label class="fl">اسم المحل</label><input class="fi" id="S_NAME" placeholder="محل تصليح الهواتف"/></div>
+      <div class="fg"><label class="fl">رقم الهاتف</label><input class="fi" id="S_PHONE" placeholder="0550000000"/></div>
+      <div class="fg"><label class="fl">العنوان</label><input class="fi" id="S_ADDR" placeholder="وسط المدينة"/></div>
+      <div class="fg"><label class="fl">الفنيون (مفصولون بفاصلة)</label><input class="fi" id="S_TECHS" placeholder="أحمد,محمد,يوسف"/></div>
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <button class="btn btn-grn" onclick="saveSettings()" style="flex:1">💾 حفظ</button>
+        <button class="btn btn-red btn-sm" onclick="resetData()">🗑️ مسح البيانات</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGE CREDENTIALS MODAL -->
+<div id="M_CRED" class="ov" style="display:none" onclick="if(event.target===this)cls('M_CRED')">
+  <div class="mb" style="max-width:420px">
+    <div class="mh"><span class="mh-title">🔐 تغيير بيانات الدخول</span><button class="btn btn-ghost btn-sm" onclick="cls('M_CRED')">✕</button></div>
+    <div class="mbody">
+      <div style="background:var(--inp);border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px">
+        اسم المستخدم الحالي: <strong id="CUR_USER" style="color:var(--acc)">—</strong>
+      </div>
+      <div class="fg"><label class="fl">اسم المستخدم الجديد</label><input class="fi" id="C_USER" dir="ltr"/></div>
+      <div class="fg"><label class="fl">كلمة المرور الجديدة</label>
+        <div class="eye-wrap"><input class="fi" id="C_PASS" type="password" placeholder="اتركه فارغاً للإبقاء على القديمة" dir="ltr"/><button class="eye-btn" onclick="toggleEye('C_PASS',this)">👁️</button></div>
+      </div>
+      <div class="fg"><label class="fl">تأكيد كلمة المرور</label>
+        <div class="eye-wrap"><input class="fi" id="C_PASS2" type="password" placeholder="أعد الكتابة" dir="ltr"/><button class="eye-btn" onclick="toggleEye('C_PASS2',this)">👁️</button></div>
+      </div>
+      <button class="btn btn-grn" onclick="saveCreds()" style="width:100%;justify-content:center">💾 حفظ بيانات الدخول</button>
+    </div>
+  </div>
+</div>
+
+<!-- BACKUP MODAL -->
+<div id="M_BCK" class="ov" style="display:none" onclick="if(event.target===this)cls('M_BCK')">
+  <div class="mb" style="max-width:480px">
+    <div class="mh"><span class="mh-title">💾 النسخ الاحتياطي</span><button class="btn btn-ghost btn-sm" onclick="cls('M_BCK')">✕</button></div>
+    <div class="mbody">
+      <div class="card" style="margin-bottom:12px">
+        <div style="font-weight:700;margin-bottom:5px">📦 تصدير نسخة احتياطية (JSON)</div>
+        <div style="font-size:12px;color:var(--mut);margin-bottom:11px">يحفظ كل البيانات — يمكن استعادتها لاحقاً</div>
+        <button class="btn btn-acc" onclick="exportJSON()" style="width:100%;justify-content:center">⬇️ تحميل الملف</button>
+      </div>
+      <div class="card" style="margin-bottom:12px">
+        <div style="font-weight:700;margin-bottom:5px">📂 استعادة من ملف JSON</div>
+        <div style="font-size:12px;color:var(--mut);margin-bottom:11px">اختر ملف النسخة الاحتياطية</div>
+        <label style="display:block;background:var(--inp);border:2px dashed var(--bor);border-radius:9px;padding:16px;text-align:center;cursor:pointer" onmouseover="this.style.borderColor='var(--acc)'" onmouseout="this.style.borderColor='var(--bor)'">
+          <div style="font-size:26px">📁</div>
+          <div style="font-size:13px;font-weight:600;margin-top:4px">اضغط لاختيار الملف</div>
+          <input type="file" accept=".json" onchange="importJSON(event)" style="display:none"/>
+        </label>
+      </div>
+      <div class="card" style="margin-bottom:12px">
+        <div style="font-weight:700;margin-bottom:5px">📊 تصدير CSV / Excel</div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-grn btn-sm" onclick="exportCSV('devices')" style="flex:1">📱 الأجهزة</button>
+          <button class="btn btn-grn btn-sm" onclick="exportCSV('customers')" style="flex:1">👥 العملاء</button>
+          <button class="btn btn-grn btn-sm" onclick="exportCSV('inventory')" style="flex:1">🧰 المخزون</button>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-weight:700;margin-bottom:5px">🖨️ تقرير PDF</div>
+        <button class="btn btn-ghost" onclick="printReport()" style="width:100%;justify-content:center;margin-top:8px">🖨️ طباعة تقرير الأجهزة</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== APP LAYOUT ===== -->
+<div class="app">
+  <!-- SIDEBAR -->
+  <div class="sb">
+    <div class="sb-logo">
+      <div class="sb-logo-title" id="SB_TITLE">🔧 TechFix Pro</div>
+      <div class="sb-logo-sub">نظام إدارة محل التصليح</div>
+    </div>
+    <div class="nav">
+      <div class="ni on" id="N_dash" onclick="go('dash')"><span class="ni-ic">🏠</span><span>لوحة التحكم</span></div>
+      <div class="ni" id="N_devs" onclick="go('devs')"><span class="ni-ic">📱</span><span>الأجهزة</span></div>
+      <div class="ni" id="N_cust" onclick="go('cust')"><span class="ni-ic">👥</span><span>العملاء</span></div>
+      <div class="ni" id="N_inv" onclick="go('inv')"><span class="ni-ic">🧰</span><span>المخزون</span></div>
+      <div class="ni" id="N_stat" onclick="go('stat')"><span class="ni-ic">📊</span><span>الإحصائيات</span></div>
+      <div class="ni" id="N_alrt" onclick="go('alrt')"><span class="ni-ic">🔔</span><span>التنبيهات</span><span class="ni-badge" id="ALRT_N" style="display:none">0</span></div>
+      <div class="ni" id="N_cred" onclick="openCreds()"><span class="ni-ic">🔐</span><span>بيانات الدخول</span></div>
+      <div class="ni" id="N_set" onclick="openSettings()"><span class="ni-ic">⚙️</span><span>الإعدادات</span></div>
+      <div class="ni" id="N_bck" onclick="cls('M_BCK')||openBCK()"><span class="ni-ic">💾</span><span>النسخ الاحتياطي</span></div>
+    </div>
+    <div class="sb-user">
+      <div class="sb-user-inner">
+        <div class="sb-avatar" id="SB_AV">👤</div>
+        <div style="flex:1;min-width:0">
+          <div class="sb-uname" id="SB_UN">—</div>
+          <div class="sb-urole">مدير النظام</div>
+        </div>
+        <button class="sb-logout" onclick="doLogout()" title="تسجيل الخروج">🚪</button>
+      </div>
+    </div>
+    <div class="sb-footer"><span class="offline-tag">● Offline</span></div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="pg on" id="P_dash">
+      <div class="sec-h">
+        <div><div class="sec-title" id="DASH_TITLE">لوحة التحكم</div><div style="color:var(--mut);font-size:12px;margin-top:2px" id="DASH_DATE"></div></div>
+        <button class="btn btn-acc" onclick="openDevModal()">+ تسجيل جهاز</button>
+      </div>
+      <div class="stats-row" id="STAT_CARDS"></div>
+      <div style="display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap" id="STATUS_CARDS"></div>
+      <div class="g2" style="gap:16px">
+        <div class="card"><div style="font-weight:700;margin-bottom:13px">🔧 آخر الأجهزة</div><div id="RECENT_D"></div></div>
+        <div class="card"><div style="font-weight:700;margin-bottom:13px">👨‍🔧 أداء الفنيين</div><div id="TECH_PERF"></div></div>
+      </div>
+    </div>
+
+    <!-- DEVICES -->
+    <div class="pg" id="P_devs">
+      <div class="sec-h">
+        <div class="sec-title">📱 إدارة الأجهزة</div>
+        <button class="btn btn-acc" onclick="openDevModal()">+ جهاز جديد</button>
+      </div>
+      <div style="display:flex;gap:9px;margin-bottom:14px;flex-wrap:wrap">
+        <input class="search" id="DEV_Q" placeholder="🔍 بحث بالاسم / IMEI / هاتف..." oninput="renderDevs()" style="flex:1;min-width:200px"/>
+        <div class="filters" id="DEV_FILTERS"></div>
+      </div>
+      <div id="DEV_LIST"></div>
+    </div>
+
+    <!-- CUSTOMERS -->
+    <div class="pg" id="P_cust">
+      <div class="sec-title">👥 إدارة العملاء</div>
+      <input class="search" id="CUST_Q" placeholder="🔍 بحث بالاسم أو الهاتف..." oninput="renderCust()" style="max-width:380px;margin-bottom:14px"/>
+      <div id="CUST_LIST"></div>
+    </div>
+
+    <!-- INVENTORY -->
+    <div class="pg" id="P_inv">
+      <div class="sec-h">
+        <div class="sec-title">🧰 إدارة المخزون</div>
+        <button class="btn btn-acc" onclick="toggleInvForm()">+ قطعة جديدة</button>
+      </div>
+      <div id="INV_FORM" style="display:none;margin-bottom:14px">
+        <div class="card">
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:9px;align-items:end;flex-wrap:wrap">
+            <div><label class="pl">الاسم</label><input class="pi" id="I_N" placeholder="اسم القطعة"/></div>
+            <div><label class="pl">الكمية</label><input class="pi" type="number" id="I_Q" value="1"/></div>
+            <div><label class="pl">شراء DA</label><input class="pi" type="number" id="I_B" value="0"/></div>
+            <div><label class="pl">بيع DA</label><input class="pi" type="number" id="I_S" value="0"/></div>
+            <div><label class="pl">حد التنبيه</label><input class="pi" type="number" id="I_M" value="2"/></div>
+            <button class="btn btn-grn btn-sm" onclick="saveInvItem()" style="margin-top:16px">حفظ</button>
+          </div>
+        </div>
+      </div>
+      <div id="INV_LIST"></div>
+    </div>
+
+    <!-- STATS -->
+    <div class="pg" id="P_stat">
+      <div class="sec-title">📊 الإحصائيات</div>
+      <div class="g2" style="gap:16px" id="STAT_GRID"></div>
+    </div>
+
+    <!-- ALERTS -->
+    <div class="pg" id="P_alrt">
+      <div class="sec-title">🔔 التنبيهات</div>
+      <div id="ALRT_LIST"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════
+const $id = id => document.getElementById(id);
+const fmt = n => Number(n||0).toLocaleString('ar-DZ');
+const today = () => new Date().toISOString().split('T')[0];
+const tmrw  = () => new Date(Date.now()+86400000).toISOString().split('T')[0];
+function load(k,def){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def;}catch{return def;}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){console.warn(e);}}
+function toast(msg,col='var(--grn)'){
+  const t=$id('TOAST');t.textContent=msg;t.style.background=col;t.style.display='block';
+  clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',2600);
+}
+function cls(id){$id(id).style.display='none';}
+function toggleEye(id,btn){const i=$id(id);i.type=i.type==='password'?'text':'password';btn.textContent=i.type==='password'?'👁️':'🙈';}
+
+// ══════════════════════════════════
+//  CONSTANTS
+// ══════════════════════════════════
+const FAULTS=['شاشة','بطارية','لا يشحن','لا يشتغل','ماء','سوفتوير','كاميرا','سماعة','مكروفون','زر طاقة'];
+const PARTS_CAT=[
+  {name:'شاشة Samsung S21',buy:3500,sell:5000},{name:'شاشة iPhone 11',buy:4000,sell:6000},
+  {name:'بطارية iPhone 12',buy:1200,sell:2000},{name:'بطارية Samsung A51',buy:800,sell:1500},
+  {name:'شاشة Xiaomi Redmi',buy:2000,sell:3500},{name:'كاميرا خلفية iPhone',buy:2500,sell:4000},
+  {name:'مكروفون عالمي',buy:300,sell:700},{name:'زجاجة ظهر iPhone',buy:1500,sell:2800},
+];
+const ST={
+  rep:{lbl:'قيد الإصلاح',cls:'b-rep',ic:'🔧',col:'#F59E0B'},
+  wait:{lbl:'انتظار قطع',cls:'b-wait',ic:'⏳',col:'#3B82F6'},
+  done:{lbl:'تم الإصلاح',cls:'b-done',ic:'✅',col:'#10B981'},
+  fail:{lbl:'غير قابل',cls:'b-fail',ic:'❌',col:'#EF4444'},
+};
+function badge(s){const x=ST[s]||ST.rep;return`<span class="badge ${x.cls}">${x.ic} ${x.lbl}</span>`;}
+
+// ══════════════════════════════════
+//  DATA
+// ══════════════════════════════════
+let devs  = load('tfp_devs',[
+  {id:1,cid:1,type:'iPhone',model:'iPhone 11',color:'أسود',imei:'123456789012345',faults:['شاشة'],notes:'شاشة مكسورة',parts:[{name:'شاشة iPhone 11',qty:1,buy:4000,sell:6000}],svc:500,status:'done',tech:'أحمد',recv:'2024-01-10',dlvr:'2024-01-11',cr:'2024-01-10'},
+  {id:2,cid:2,type:'Samsung',model:'Galaxy S21',color:'أبيض',imei:'987654321098765',faults:['بطارية','لا يشحن'],notes:'البطارية تنتهي بسرعة',parts:[{name:'بطارية Samsung A51',qty:1,buy:800,sell:1500}],svc:300,status:'rep',tech:'محمد',recv:'2024-01-12',dlvr:'2024-01-13',cr:'2024-01-12'},
+  {id:3,cid:3,type:'Xiaomi',model:'Redmi Note 10',color:'أزرق',imei:'111222333444555',faults:['ماء'],notes:'سقط في الماء',parts:[],svc:1500,status:'wait',tech:'يوسف',recv:'2024-01-13',dlvr:'2024-01-15',cr:'2024-01-13'},
+  {id:4,cid:1,type:'iPhone',model:'iPhone 12 Pro',color:'ذهبي',imei:'666777888999000',faults:['سوفتوير'],notes:'لا يشتغل بعد التحديث',parts:[],svc:2000,status:'done',tech:'كريم',recv:'2024-01-08',dlvr:'2024-01-09',cr:'2024-01-08'},
+]);
+let custs = load('tfp_custs',[
+  {id:1,name:'عمر بوعلام',phone:'0551234567',email:'omar@mail.com',cr:'2024-01-08'},
+  {id:2,name:'فاطمة زهراء',phone:'0661234567',email:'',cr:'2024-01-12'},
+  {id:3,name:'يزيد منصور',phone:'0771234567',email:'yazid@mail.com',cr:'2024-01-13'},
+]);
+let invt  = load('tfp_invt',[
+  {id:1,name:'شاشة Samsung S21',qty:5,buy:3500,sell:5000,min:2},
+  {id:2,name:'شاشة iPhone 11',qty:3,buy:4000,sell:6000,min:2},
+  {id:3,name:'بطارية iPhone 12',qty:8,buy:1200,sell:2000,min:3},
+  {id:4,name:'بطارية Samsung A51',qty:1,buy:800,sell:1500,min:2},
+  {id:5,name:'كاميرا خلفية iPhone',qty:2,buy:2500,sell:4000,min:1},
+]);
+let cfg   = load('tfp_cfg',{name:'محل تصليح الهواتف',phone:'0550000000',addr:'وسط المدينة',techs:'أحمد,محمد,يوسف,كريم,سمير'});
+let auth  = load('tfp_auth',{user:'admin',hash:hp('1234')});
+
+function persist(){save('tfp_devs',devs);save('tfp_custs',custs);save('tfp_invt',invt);save('tfp_cfg',cfg);save('tfp_auth',auth);}
+function techs(){return cfg.techs.split(',').map(t=>t.trim()).filter(Boolean);}
+function devTotal(d){return(d.parts?.reduce((s,p)=>s+(p.sell*p.qty),0)||0)+(d.svc||0);}
+function devCost(d){return d.parts?.reduce((s,p)=>s+(p.buy*p.qty),0)||0;}
+
+// ══════════════════════════════════
+//  AUTH
+// ══════════════════════════════════
+function hp(p){let h=0;for(let i=0;i<p.length;i++){h=((h<<5)-h)+p.charCodeAt(i);h|=0;}return h.toString(36);}
+
+function initLogin(){
+  $id('L_SHOP').textContent=cfg.name||'TechFix Pro';
+  $id('LOGIN').style.display='flex';
+  setTimeout(()=>$id('L_USER').focus(),120);
+}
+function doLogin(){
+  const u=$id('L_USER').value.trim();
+  const p=$id('L_PASS').value;
+  if(!u){showLErr('أدخل اسم المستخدم');return;}
+  if(!p){showLErr('أدخل كلمة المرور');return;}
+  if(u===auth.user && hp(p)===auth.hash){
+    $id('LOGIN').style.display='none';
+    $id('L_USER').value='';$id('L_PASS').value='';
+    $id('SB_UN').textContent=auth.user;
+    $id('SB_AV').textContent='👨‍💼';
+    renderDash();updAlerts();
+  } else {
+    showLErr('❌ اسم المستخدم أو كلمة المرور غير صحيحة');
+    const b=$id('LOGIN_BOX');
+    b.style.animation='none';void b.offsetWidth;b.style.animation='shake .4s ease';
+    $id('L_PASS').value='';$id('L_PASS').focus();
+  }
+}
+function showLErr(m){const e=$id('L_ERR');e.textContent=m;e.style.display='block';setTimeout(()=>e.style.display='none',3500);}
+function doLogout(){if(!confirm('تسجيل الخروج؟'))return;$id('L_USER').value='';$id('L_PASS').value='';$id('LOGIN').style.display='flex';setTimeout(()=>$id('L_USER').focus(),120);}
+
+function openCreds(){
+  $id('CUR_USER').textContent=auth.user;
+  $id('C_USER').value=auth.user;
+  $id('C_PASS').value='';$id('C_PASS2').value='';
+  $id('M_CRED').style.display='flex';
+}
+function saveCreds(){
+  const u=$id('C_USER').value.trim();
+  const p1=$id('C_PASS').value;const p2=$id('C_PASS2').value;
+  if(!u){toast('⚠️ أدخل اسم المستخدم','var(--yel)');return;}
+  if(p1&&p1!==p2){toast('❌ كلمتا المرور غير متطابقتين','var(--red)');return;}
+  if(p1&&p1.length<3){toast('⚠️ كلمة المرور قصيرة جداً','var(--yel)');return;}
+  auth.user=u;if(p1)auth.hash=hp(p1);
+  persist();$id('SB_UN').textContent=u;cls('M_CRED');toast('✅ تم تحديث بيانات الدخول');
+}
+
+// ══════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════
+let curPage='dash';
+function go(page){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  $id('P_'+page).classList.add('on');
+  $id('N_'+page).classList.add('on');
+  curPage=page;
+  if(page==='dash')renderDash();
+  else if(page==='devs')renderDevs();
+  else if(page==='cust')renderCust();
+  else if(page==='inv')renderInv();
+  else if(page==='stat')renderStat();
+  else if(page==='alrt')renderAlerts();
+}
+
+// ══════════════════════════════════
+//  ALERTS
+// ══════════════════════════════════
+function calcAlerts(){
+  const a=[];
+  devs.filter(d=>d.status==='done').forEach(d=>{if((new Date()-new Date(d.dlvr))/86400000>3)a.push({t:'warn',m:`جهاز ${d.model} جاهز ولم يُستلم منذ أكثر من 3 أيام`});});
+  devs.filter(d=>d.status==='rep').forEach(d=>{if((new Date()-new Date(d.recv))/86400000>7)a.push({t:'err',m:`جهاز ${d.model} في الإصلاح منذ أكثر من أسبوع`});});
+  invt.filter(i=>i.qty<=i.min).forEach(i=>a.push({t:'warn',m:`مخزون منخفض: ${i.name} — ${i.qty} قطعة`}));
+  return a;
+}
+function updAlerts(){
+  const n=calcAlerts().length;
+  const b=$id('ALRT_N');b.textContent=n;b.style.display=n?'inline-block':'none';
+}
+
+// ══════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════
+function renderDash(){
+  $id('DASH_DATE').textContent=new Date().toLocaleDateString('ar-DZ',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  $id('DASH_TITLE').textContent=cfg.name||'لوحة التحكم';
+  $id('SB_TITLE').textContent='🔧 '+(cfg.name||'TechFix Pro');
+  const td=today();
+  const tDevs=devs.filter(d=>d.cr===td||d.recv===td);
+  const tRev=tDevs.filter(d=>d.status==='done').reduce((s,d)=>s+devTotal(d),0);
+  const allRev=devs.filter(d=>d.status==='done').reduce((s,d)=>s+devTotal(d),0);
+  const allProf=devs.filter(d=>d.status==='done').reduce((s,d)=>s+devTotal(d)-devCost(d),0);
+  $id('STAT_CARDS').innerHTML=[
+    {ic:'📱',lbl:'أجهزة اليوم',val:tDevs.length,col:'var(--blu)',sub:`+${tDevs.length}`},
+    {ic:'💰',lbl:'إيرادات اليوم',val:fmt(tRev)+' DA',col:'var(--grn)',sub:'اليوم'},
+    {ic:'📈',lbl:'إجمالي الإيرادات',val:fmt(allRev)+' DA',col:'var(--acc)',sub:'كلي'},
+    {ic:'🏆',lbl:'الأرباح الكلية',val:fmt(allProf)+' DA',col:'var(--yel)',sub:'ربح'},
+  ].map(s=>`<div class="card sc">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <span style="font-size:26px">${s.ic}</span>
+      <span class="sc-sub" style="background:${s.col}22;color:${s.col}">${s.sub}</span>
+    </div>
+    <div class="sc-val" style="color:${s.col}">${s.val}</div>
+    <div class="sc-lbl">${s.lbl}</div>
+  </div>`).join('');
+  $id('STATUS_CARDS').innerHTML=Object.entries(ST).map(([k,v])=>{
+    const n=devs.filter(d=>d.status===k).length;
+    return`<div class="card" style="flex:1;min-width:130px;cursor:pointer" onclick="go('devs');curFilter='${k}';renderDevs()"
+      onmouseover="this.style.borderColor='${v.col}'" onmouseout="this.style.borderColor='var(--bor)'">
+      <div style="font-size:22px">${v.ic}</div>
+      <div style="font-size:26px;font-weight:800;color:${v.col};font-family:'Courier New',monospace">${n}</div>
+      <div style="font-size:12px;color:var(--mut)">${v.lbl}</div>
+    </div>`;
+  }).join('');
+  $id('RECENT_D').innerHTML=devs.slice(0,6).map(d=>{
+    const c=custs.find(x=>x.id===d.cid);
+    return`<div class="ri"><div><div style="font-weight:600;font-size:13px">${d.type} ${d.model}</div><div style="font-size:11px;color:var(--mut)">${c?.name||'—'} • ${d.recv}</div></div>${badge(d.status)}</div>`;
+  }).join('');
+  const ts=techs().map(t=>{const td=devs.filter(d=>d.tech===t);const rev=td.filter(d=>d.status==='done').reduce((s,d)=>s+devTotal(d),0);return{t,n:td.length,rev};});
+  const mx=Math.max(...ts.map(x=>x.n),1);
+  $id('TECH_PERF').innerHTML=ts.map(x=>`<div style="margin-bottom:11px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:3px;font-size:13px">
+      <span style="font-weight:600">${x.t}</span><span style="color:var(--mut)">${x.n} جهاز • ${fmt(x.rev)} DA</span>
+    </div>
+    <div class="prog-wrap"><div class="prog-bar" style="width:${Math.round(x.n/mx*100)}%"></div></div>
+  </div>`).join('');
+}
+
+// ══════════════════════════════════
+//  DEVICES
+// ══════════════════════════════════
+let curFilter='all';
+function renderDevs(){
+  const q=($id('DEV_Q')?.value||'').toLowerCase();
+  $id('DEV_FILTERS').innerHTML=[['all','الكل'],['rep','قيد الإصلاح'],['wait','انتظار'],['done','تم'],['fail','فشل']].map(([k,l])=>
+    `<button class="btn btn-sm ${curFilter===k?'btn-acc':'btn-ghost'}" onclick="curFilter='${k}';renderDevs()">${l}</button>`
+  ).join('');
+  const list=devs.filter(d=>{
+    const c=custs.find(x=>x.id===d.cid);
+    return(!q||d.imei?.includes(q)||d.model?.toLowerCase().includes(q)||c?.name?.includes(q)||c?.phone?.includes(q))
+      &&(curFilter==='all'||d.status===curFilter);
+  });
+  if(!list.length){$id('DEV_LIST').innerHTML=`<div style="text-align:center;color:var(--mut);padding:60px;font-size:15px">🔍 لا توجد أجهزة مطابقة</div>`;return;}
+  $id('DEV_LIST').innerHTML=list.map(d=>{
+    const c=custs.find(x=>x.id===d.cid);
+    const tot=devTotal(d);
+    return`<div class="card dc">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap">
+        <div style="flex:1;min-width:180px">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:5px;flex-wrap:wrap">
+            <span style="font-size:16px;font-weight:800">${d.type} ${d.model}</span>
+            ${badge(d.status)}
+            ${d.color?`<span class="ctag">${d.color}</span>`:''}
+          </div>
+          <div class="dc-meta">
+            <span>👤 ${c?.name||'—'}</span>
+            <span>📞 ${c?.phone||'—'}</span>
+            <span class="mono" style="font-size:11px">IMEI: ${d.imei}</span>
+            <span>🔧 ${d.faults?.join('، ')||'—'}</span>
+            <span>👨‍🔧 ${d.tech}</span>
+            <span>📅 ${d.recv}</span>
+          </div>
+        </div>
+        <div style="flex-shrink:0;text-align:left">
+          <div style="font-size:19px;font-weight:800;color:var(--grn);font-family:'Courier New',monospace">${fmt(tot)} DA</div>
+          <div style="display:flex;gap:5px;margin-top:8px;justify-content:flex-end;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" onclick="showTicket(${d.id})" title="تذكرة الزبون">🎫</button>
+            <button class="btn btn-ghost btn-sm" onclick="showInvoice(${d.id})" title="فاتورة">🧾</button>
+            <button class="btn btn-wa btn-sm" onclick="sendWA(${d.id})" title="واتساب">📲</button>
+            <button class="btn btn-ghost btn-sm" onclick="openDevModal(${d.id})" title="تعديل">✏️</button>
+            <button class="btn btn-red btn-sm" onclick="delDev(${d.id})" title="حذف">🗑️</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function delDev(id){if(!confirm('حذف هذا الجهاز؟'))return;devs=devs.filter(d=>d.id!==id);persist();renderDevs();toast('🗑️ تم الحذف','var(--red)');updAlerts();}
+
+// ══════════════════════════════════
+//  INVOICE
+// ══════════════════════════════════
+function showInvoice(id){
+  const d=devs.find(x=>x.id===id);const c=custs.find(x=>x.id===d.cid);
+  const tot=devTotal(d);
+  $id('INV_BODY').innerHTML=`
+    <div class="inv-hdr">
+      <div style="font-size:22px;font-weight:800;color:var(--acc)">🔧 ${cfg.name||'محل تصليح الهواتف'}</div>
+      <div style="color:var(--mut);font-size:12px;margin-top:3px">📞 ${cfg.phone} | ${cfg.addr}</div>
+    </div>
+    <div class="inv-g">
+      <div><div class="inv-lbl">العميل</div><div class="inv-val">${c?.name||'—'}</div></div>
+      <div><div class="inv-lbl">الهاتف</div><div class="inv-val">${c?.phone||'—'}</div></div>
+      <div><div class="inv-lbl">الجهاز</div><div class="inv-val">${d.type} ${d.model}</div></div>
+      <div><div class="inv-lbl">اللون</div><div class="inv-val">${d.color||'—'}</div></div>
+      <div><div class="inv-lbl">IMEI</div><div class="inv-val mono" style="font-size:11px">${d.imei}</div></div>
+      <div><div class="inv-lbl">تاريخ الاستلام</div><div class="inv-val">${d.recv}</div></div>
+      <div style="grid-column:1/-1"><div class="inv-lbl">الأعطال</div><div class="inv-val">${d.faults?.join('، ')||'—'}</div></div>
+      ${d.notes?`<div style="grid-column:1/-1"><div class="inv-lbl">ملاحظات</div><div class="inv-val" style="font-weight:400;font-size:12px">${d.notes}</div></div>`:''}
+    </div>
+    ${d.parts?.length?'<div style="font-weight:700;margin-bottom:7px;color:var(--accL);font-size:13px">القطع المستعملة:</div>'+
+      d.parts.map(p=>`<div class="inv-row"><span>${p.name} × ${p.qty}</span><span class="mono c-grn">${fmt(p.sell*p.qty)} DA</span></div>`).join(''):''}
+    <div class="inv-row"><span>تكلفة الخدمة</span><span class="mono">${fmt(d.svc)} DA</span></div>
+    <div class="inv-total"><span>المجموع الكلي</span><span class="mono">${fmt(tot)} DA</span></div>
+    <div class="inv-warn">⚠️ المحل غير مسؤول عن فقدان البيانات الشخصية المخزنة في الجهاز</div>
+    <div style="display:flex;gap:9px;margin-top:14px">
+      <button class="btn btn-acc" style="flex:1;justify-content:center" onclick="window.print()">🖨️ طباعة</button>
+      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="cls('M_INV')">إغلاق</button>
+    </div>`;
+  $id('M_INV').style.display='flex';
+}
+
+// ══════════════════════════════════
+//  TICKET 🎫 — وصل الزبون
+// ══════════════════════════════════
+function tktNum(id){return 'TF-'+String(id).slice(-5).padStart(5,'0');}
+
+function stColor(s){return{rep:'#F59E0B',wait:'#3B82F6',done:'#10B981',fail:'#EF4444'}[s]||'#6b7280';}
+function stLabel(s){return{rep:'قيد الإصلاح',wait:'انتظار قطع',done:'تم الإصلاح',fail:'غير قابل'}[s]||s;}
+function stIcon(s){return{rep:'🔧',wait:'⏳',done:'✅',fail:'❌'}[s]||'';}
+
+function tktHTML(id, forPrint=false){
+  const d=devs.find(x=>x.id===id);
+  const c=custs.find(x=>x.id===d.cid);
+  const num=tktNum(id);
+  const tot=devTotal(d);
+  const sc=stColor(d.status);
+
+  if(forPrint){
+    return `<div style="font-family:Tahoma,'Segoe UI',Arial,sans-serif;direction:rtl;max-width:340px;margin:auto;background:#fff;color:#111">
+      <!-- HEADER -->
+      <div style="background:linear-gradient(135deg,#6C63FF,#4F46E5);color:#fff;padding:22px 20px 18px;text-align:center;border-radius:12px 12px 0 0">
+        <div style="font-size:22px;font-weight:800">🔧 ${cfg.name||'محل تصليح الهواتف'}</div>
+        <div style="font-size:12px;opacity:.85;margin-top:4px">📞 ${cfg.phone||''}${cfg.addr?' &nbsp;|&nbsp; '+cfg.addr:''}</div>
+        <div style="background:rgba(255,255,255,.18);border-radius:10px;padding:9px 18px;margin-top:14px;display:inline-block">
+          <div style="font-size:10px;opacity:.8;letter-spacing:1px">رقم الوصل</div>
+          <div style="font-size:24px;font-weight:800;font-family:'Courier New',monospace;letter-spacing:3px;margin-top:2px">${num}</div>
+        </div>
+      </div>
+      <!-- BODY -->
+      <div style="padding:18px 20px;background:#fff">
+        ${[
+          ['👤 اسم الزبون', c?.name||'—'],
+          ['📞 رقم الهاتف', c?.phone||'—'],
+          ['📱 الجهاز', `${d.type} ${d.model}${d.color?' / '+d.color:''}`],
+          ['🎨 اللون', d.color||'—'],
+          ['🔧 الأعطال', d.faults?.join('، ')||'—'],
+          ...(d.notes?[['📝 ملاحظة', d.notes]]:[]),
+          ['📅 تاريخ الاستلام', d.recv],
+          ['⏰ موعد التسليم', `<span style="color:#10B981;font-weight:800">${d.dlvr}</span>`],
+          ['🔢 IMEI', `<span style="font-family:'Courier New',monospace;font-size:11px">${d.imei}</span>`],
+          ['👨‍🔧 الفني', d.tech],
+        ].map(([k,v])=>`<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px dashed #e5e7eb;font-size:13px;gap:8px">
+          <span style="color:#6b7280;font-size:11px;min-width:95px;flex-shrink:0;padding-top:1px">${k}</span>
+          <span style="font-weight:700;text-align:left;flex:1">${v}</span>
+        </div>`).join('')}
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;font-size:13px;gap:8px">
+          <span style="color:#6b7280;font-size:11px">📊 الحالة</span>
+          <span style="background:${sc}20;color:${sc};padding:3px 12px;border-radius:16px;font-size:11px;font-weight:700">${stIcon(d.status)} ${stLabel(d.status)}</span>
+        </div>
+        ${tot>0?`<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;color:#166534">💰 المبلغ المتوقع</span>
+          <span style="font-size:18px;font-weight:800;color:#166534;font-family:'Courier New',monospace">${fmt(tot)} DA</span>
+        </div>`:''}
+      </div>
+      <!-- CUT LINE -->
+      <div style="border-top:2px dashed #d1d5db;margin:0 16px;position:relative">
+        <span style="position:absolute;top:-11px;right:-4px;font-size:16px;color:#d1d5db;background:#fff">✂</span>
+      </div>
+      <!-- FOOTER -->
+      <div style="background:#f9fafb;border-radius:0 0 12px 12px;padding:14px 20px;text-align:center">
+        <div style="font-size:10px;color:#9ca3af;line-height:1.8">
+          ⚠️ يرجى الاحتفاظ بهذا الوصل لاستلام جهازك<br/>
+          المحل غير مسؤول عن فقدان البيانات الشخصية<br/>
+          <strong style="color:#374151">${cfg.name}</strong> — 📞 ${cfg.phone||''}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // UI version (dark theme)
+  return `<div class="tkt-outer">
+    <div class="tkt-paper">
+      <div class="tkt-top">
+        <div class="tkt-shop-name">🔧 ${cfg.name||'محل تصليح الهواتف'}</div>
+        <div class="tkt-shop-info">📞 ${cfg.phone||''}${cfg.addr?' &nbsp;|&nbsp; '+cfg.addr:''}</div>
+        <div class="tkt-num-box">
+          <div class="tkt-num-lbl">رقم الوصل</div>
+          <div class="tkt-num-val">${num}</div>
+        </div>
+      </div>
+      <div class="tkt-mid">
+        ${[
+          ['👤 اسم الزبون', c?.name||'—'],
+          ['📞 رقم الهاتف', `<span style="font-family:'Courier New',monospace">${c?.phone||'—'}</span>`],
+          ['📱 الجهاز', `${d.type} ${d.model}${d.color?' / '+d.color:''}`],
+          ['🔧 الأعطال', d.faults?.join('، ')||'—'],
+          ...(d.notes?[['📝 ملاحظة', `<span style="font-weight:400;color:#6b7280">${d.notes}</span>`]]:[]),
+          ['📅 الاستلام', d.recv],
+          ['⏰ التسليم', `<span style="color:#10B981;font-weight:800">${d.dlvr}</span>`],
+          ['👨‍🔧 الفني', d.tech],
+          ['🔢 IMEI', `<span style="font-family:'Courier New',monospace;font-size:11px">${d.imei}</span>`],
+        ].map(([k,v])=>`<div class="tkt-row"><span class="tkt-k">${k}</span><span class="tkt-v">${v}</span></div>`).join('')}
+        <div class="tkt-row">
+          <span class="tkt-k">📊 الحالة</span>
+          <span class="tkt-status" style="background:${sc}20;color:${sc}">${stIcon(d.status)} ${stLabel(d.status)}</span>
+        </div>
+        ${tot>0?`<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:9px;padding:11px 14px;margin-top:12px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;font-weight:600;color:#166534">💰 المبلغ المتوقع</span>
+          <span style="font-size:19px;font-weight:800;color:#166534;font-family:'Courier New',monospace">${fmt(tot)} DA</span>
+        </div>`:''}
+      </div>
+      <div class="tkt-cut"></div>
+      <div class="tkt-bottom">
+        <div class="tkt-warn-txt">⚠️ يرجى الاحتفاظ بهذا الوصل لاستلام جهازك<br/>المحل غير مسؤول عن فقدان البيانات الشخصية</div>
+      </div>
+      <div class="tkt-actions">
+        <button class="btn btn-acc" style="flex:1;justify-content:center" onclick="printTicketInline(${id})">🖨️ طباعة الوصل</button>
+        <button class="btn btn-wa" style="flex:1;justify-content:center" onclick="tktWA(${id})">📲 إرسال واتساب</button>
+        <button class="btn btn-ghost btn-sm" onclick="cls('M_TKT')" title="إغلاق">✕</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function showTicket(id){
+  $id('TKT_BODY').innerHTML=tktHTML(id,false);
+  $id('M_TKT').style.display='flex';
+}
+
+function printTicketInline(id){
+  const html=tktHTML(id,true);
+  const pf=$id('PRINT_FRAME');
+  pf.innerHTML=`<div id="printTarget" style="position:fixed;inset:0;background:#fff;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div>${html}</div>
+    <button onclick="document.getElementById('PRINT_FRAME').innerHTML=''" style="position:fixed;top:14px;left:14px;background:#EF4444;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;font-family:Tahoma,sans-serif">✕ إغلاق</button>
+  </div>`;
+  pf.style.display='block';
+  setTimeout(()=>window.print(),200);
+}
+
+function tktWA(id){
+  const d=devs.find(x=>x.id===id);const c=custs.find(x=>x.id===d.cid);const num=tktNum(id);
+  const tot=devTotal(d);
+  const msg=[
+    `🔧 *${cfg.name||'محل تصليح الهواتف'}*`,
+    `📞 ${cfg.phone||''}`,
+    `${'─'.repeat(22)}`,
+    `🎫 *رقم الوصل: ${num}*`,
+    `${'─'.repeat(22)}`,
+    `👤 *الزبون:* ${c?.name||'—'}`,
+    `📞 *الهاتف:* ${c?.phone||'—'}`,
+    `📱 *الجهاز:* ${d.type} ${d.model}${d.color?' / '+d.color:''}`,
+    `🔧 *الأعطال:* ${d.faults?.join('، ')||'—'}`,
+    ...(d.notes?[`📝 *ملاحظة:* ${d.notes}`]:[]),
+    `📅 *تاريخ الاستلام:* ${d.recv}`,
+    `⏰ *موعد التسليم المتوقع:* ${d.dlvr}`,
+    ...(tot>0?[`${'─'.repeat(22)}`,`💰 *المبلغ المتوقع: ${fmt(tot)} DA*`]:[]),
+    `${'─'.repeat(22)}`,
+    `⚠️ يرجى الاحتفاظ بهذا الوصل لاستلام جهازك`,
+  ].join('\n');
+  window.open(`https://wa.me/${(c?.phone||'').replace(/^0/,'213')}?text=${encodeURIComponent(msg)}`);
+}
+
+// ══════════════════════════════════
+//  WHATSAPP
+// ══════════════════════════════════
+function sendWA(id){
+  const d=devs.find(x=>x.id===id);const c=custs.find(x=>x.id===d.cid);
+  const msg=`مرحبا 👋 ${c?.name||''}\nتم استلام جهازك:\n📱 ${d.type} ${d.model}\n🔧 ${d.faults?.join('، ')||'—'}\n💰 ${fmt(devTotal(d))} DA\n📅 التسليم المتوقع: ${d.dlvr}\n\n${cfg.name}\n📞 ${cfg.phone}`;
+  window.open(`https://wa.me/${(c?.phone||'').replace(/^0/,'213')}?text=${encodeURIComponent(msg)}`);
+}
+
+// ══════════════════════════════════
+//  CUSTOMERS
+// ══════════════════════════════════
+function renderCust(){
+  const q=($id('CUST_Q')?.value||'').toLowerCase();
+  const list=custs.filter(c=>!q||c.name.includes(q)||c.phone.includes(q));
+  if(!list.length){$id('CUST_LIST').innerHTML=`<div style="text-align:center;color:var(--mut);padding:60px">لا يوجد عملاء</div>`;return;}
+  $id('CUST_LIST').innerHTML=list.map(c=>{
+    const cd=devs.filter(d=>d.cid===c.id);
+    const sp=cd.filter(d=>d.status==='done').reduce((s,d)=>s+devTotal(d),0);
+    return`<div class="card" style="margin-bottom:11px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-weight:700;font-size:15px">${c.name}</div>
+          <div style="font-size:12px;color:var(--mut);margin-top:3px">📞 ${c.phone}${c.email?` • ✉️ ${c.email}`:''}</div>
+          <div style="display:flex;gap:6px;margin-top:7px;flex-wrap:wrap">${cd.map(d=>badge(d.status)).join('')}</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:18px;font-weight:800;color:var(--acc);font-family:'Courier New',monospace">${fmt(sp)} DA</div>
+          <div style="font-size:11px;color:var(--mut)">${cd.length} جهاز</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════
+//  INVENTORY
+// ══════════════════════════════════
+function renderInv(){
+  if(!invt.length){$id('INV_LIST').innerHTML=`<div style="text-align:center;color:var(--mut);padding:60px">المخزون فارغ</div>`;return;}
+  $id('INV_LIST').innerHTML=invt.map(it=>{
+    const low=it.qty<=it.min;
+    return`<div class="card ${low?'ac-err':''}" style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-weight:700;font-size:14px">${it.name}</div>
+          <div style="font-size:12px;color:var(--mut);margin-top:3px">شراء: ${fmt(it.buy)} DA • بيع: ${fmt(it.sell)} DA • حد التنبيه: ${it.min}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          ${low?'<span class="low">⚠️ منخفض</span>':''}
+          <div style="text-align:center">
+            <div style="font-size:26px;font-weight:800;font-family:'Courier New',monospace;color:${low?'var(--red)':'var(--grn)'}">${it.qty}</div>
+            <div style="font-size:10px;color:var(--mut)">قطعة</div>
+          </div>
+          <div style="display:flex;gap:5px">
+            <button class="btn btn-ghost btn-sm" onclick="chgQty(${it.id},1)">+</button>
+            <button class="btn btn-ghost btn-sm" onclick="chgQty(${it.id},-1)">−</button>
+            <button class="btn btn-red btn-sm" onclick="delInv(${it.id})">🗑️</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function chgQty(id,d){invt=invt.map(i=>i.id===id?{...i,qty:Math.max(0,i.qty+d)}:i);persist();renderInv();updAlerts();}
+function delInv(id){if(!confirm('حذف؟'))return;invt=invt.filter(i=>i.id!==id);persist();renderInv();toast('🗑️ تم الحذف','var(--red)');updAlerts();}
+function toggleInvForm(){const f=$id('INV_FORM');f.style.display=f.style.display==='none'?'block':'none';}
+function saveInvItem(){
+  const n=$id('I_N').value.trim();if(!n){toast('⚠️ أدخل اسم القطعة','var(--yel)');return;}
+  invt.push({id:Date.now(),name:n,qty:parseInt($id('I_Q').value)||0,buy:parseFloat($id('I_B').value)||0,sell:parseFloat($id('I_S').value)||0,min:parseInt($id('I_M').value)||2});
+  persist();$id('INV_FORM').style.display='none';
+  $id('I_N').value='';$id('I_Q').value='1';$id('I_B').value='0';$id('I_S').value='0';$id('I_M').value='2';
+  renderInv();toast('✅ تمت الإضافة');updAlerts();
+}
+
+// ══════════════════════════════════
+//  STATS
+// ══════════════════════════════════
+function renderStat(){
+  const fs=FAULTS.map(f=>({f,n:devs.filter(d=>d.faults?.includes(f)).length})).sort((a,b)=>b.n-a.n).slice(0,6);
+  const mf=Math.max(...fs.map(x=>x.n),1);
+  const ts=techs().map(t=>{const td=devs.filter(d=>d.tech===t);const r=td.filter(d=>d.status==='done').reduce((s,d)=>s+devTotal(d),0);return{t,n:td.length,r};}).sort((a,b)=>b.r-a.r);
+  const tc=custs.map(c=>{const sp=devs.filter(d=>d.cid===c.id&&d.status==='done').reduce((s,d)=>s+devTotal(d),0);return{...c,sp};}).sort((a,b)=>b.sp-a.sp).slice(0,5);
+  const dn=devs.filter(d=>d.status==='done');
+  const rev=dn.reduce((s,d)=>s+devTotal(d),0);
+  const prf=dn.reduce((s,d)=>s+devTotal(d)-devCost(d),0);
+  $id('STAT_GRID').innerHTML=`
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:13px;color:var(--accL)">🔧 أكثر الأعطال شيوعاً</div>
+      ${fs.map(x=>`<div style="margin-bottom:11px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px;font-size:13px"><span>${x.f}</span><span style="color:var(--mut)">${x.n}</span></div>
+        <div class="prog-wrap"><div class="prog-bar" style="width:${Math.round(x.n/mf*100)}%"></div></div>
+      </div>`).join('')}
+    </div>
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:13px;color:var(--accL)">👨‍🔧 أداء الفنيين</div>
+      ${ts.map((x,i)=>`<div class="ri">
+        <div style="display:flex;align-items:center;gap:9px"><span class="rank">${i+1}</span><span style="font-weight:600">${x.t}</span></div>
+        <div style="text-align:left"><div class="mono c-grn fw8">${fmt(x.r)} DA</div><div style="font-size:10px;color:var(--mut)">${x.n} جهاز</div></div>
+      </div>`).join('')}
+    </div>
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:13px;color:var(--accL)">⭐ أفضل الزبائن</div>
+      ${tc.length?tc.map((c,i)=>`<div class="ri"><span>${i+1}. ${c.name}</span><span class="mono c-yel fw8">${fmt(c.sp)} DA</span></div>`).join(''):'<div style="color:var(--mut);text-align:center;padding:20px">لا يوجد بيانات</div>'}
+    </div>
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:13px;color:var(--accL)">💹 ملخص مالي</div>
+      ${[['إجمالي الإيرادات',fmt(rev)+' DA','var(--grn)'],['إجمالي الأرباح',fmt(prf)+' DA','var(--acc)'],['أجهزة تم إصلاحها',dn.length+' جهاز','var(--blu)'],['معدل النجاح',Math.round(dn.length/Math.max(devs.length,1)*100)+'%','var(--yel)'],['إجمالي العملاء',custs.length+' عميل','var(--mut)'],['إجمالي الأجهزة',devs.length+' جهاز','var(--mut)']].map(([l,v,c])=>`<div class="ri"><span style="color:var(--mut)">${l}</span><span class="mono fw8" style="color:${c}">${v}</span></div>`).join('')}
+    </div>`;
+}
+
+// ══════════════════════════════════
+//  ALERTS
+// ══════════════════════════════════
+function renderAlerts(){
+  const al=calcAlerts();
+  if(!al.length){$id('ALRT_LIST').innerHTML=`<div class="card" style="text-align:center;padding:60px"><div style="font-size:46px">✅</div><div style="font-size:17px;font-weight:700;margin-top:11px">لا توجد تنبيهات</div><div style="color:var(--mut);margin-top:5px">كل شيء على ما يرام 👌</div></div>`;return;}
+  $id('ALRT_LIST').innerHTML=al.map(a=>`<div class="card ${a.t==='err'?'ac-err':'ac-warn'}" style="margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:11px"><span style="font-size:22px">${a.t==='err'?'🔴':'🟡'}</span><span style="font-size:14px">${a.m}</span></div>
+  </div>`).join('');
+}
+
+// ══════════════════════════════════
+//  SETTINGS
+// ══════════════════════════════════
+function openSettings(){$id('S_NAME').value=cfg.name;$id('S_PHONE').value=cfg.phone;$id('S_ADDR').value=cfg.addr;$id('S_TECHS').value=cfg.techs;$id('M_SET').style.display='flex';}
+function saveSettings(){
+  cfg={name:$id('S_NAME').value,phone:$id('S_PHONE').value,addr:$id('S_ADDR').value,techs:$id('S_TECHS').value};
+  persist();cls('M_SET');toast('✅ تم حفظ الإعدادات');renderDash();
+}
+function resetData(){
+  if(!confirm('⚠️ حذف كل البيانات؟'))return;
+  if(!confirm('تأكيد نهائي؟'))return;
+  devs=[];custs=[];invt=[];persist();cls('M_SET');toast('🗑️ تم مسح البيانات','var(--red)');go('dash');updAlerts();
+}
+function openBCK(){$id('M_BCK').style.display='flex';}
+
+// ══════════════════════════════════
+//  BACKUP
+// ══════════════════════════════════
+function exportJSON(){
+  const blob=new Blob([JSON.stringify({v:'3.0',date:new Date().toISOString(),cfg,devs,custs,invt},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`techfix-backup-${today()}.json`;a.click();
+  toast('✅ تم تحميل النسخة الاحتياطية');
+}
+function importJSON(ev){
+  const f=ev.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const d=JSON.parse(e.target.result);
+      if(!d.devs||!d.custs)throw 0;
+      if(!confirm(`استعادة من ${f.name}؟ سيتم استبدال البيانات الحالية.`))return;
+      devs=d.devs||[];custs=d.custs||[];invt=d.invt||[];if(d.cfg)cfg={...cfg,...d.cfg};
+      persist();cls('M_BCK');toast('✅ تمت الاستعادة — '+devs.length+' جهاز');go('dash');updAlerts();
+    }catch{toast('❌ ملف غير صالح','var(--red)');}
+  };r.readAsText(f);
+}
+function exportCSV(type){
+  let rows=[],fn='';
+  if(type==='devices'){
+    fn=`techfix-devices-${today()}.csv`;
+    rows.push(['الرقم','النوع','الموديل','اللون','IMEI','العميل','الهاتف','الأعطال','الحالة','الفني','الاستلام','التسليم','المجموع','الربح']);
+    devs.forEach(d=>{const c=custs.find(x=>x.id===d.cid);const tot=devTotal(d);rows.push([d.id,d.type,d.model,d.color,d.imei,c?.name||'',c?.phone||'',d.faults?.join('+'),ST[d.status]?.lbl||d.status,d.tech,d.recv,d.dlvr,tot,tot-devCost(d)]);});
+  }else if(type==='customers'){
+    fn=`techfix-customers-${today()}.csv`;
+    rows.push(['الرقم','الاسم','الهاتف','البريد','تاريخ التسجيل','عدد الأجهزة','إجمالي الإنفاق']);
+    custs.forEach(c=>{const sp=devs.filter(d=>d.cid===c.id&&d.status==='done').reduce((s,d)=>s+devTotal(d),0);rows.push([c.id,c.name,c.phone,c.email,c.cr,devs.filter(d=>d.cid===c.id).length,sp]);});
+  }else{
+    fn=`techfix-inventory-${today()}.csv`;
+    rows.push(['الرقم','القطعة','الكمية','شراء','بيع','حد التنبيه','الحالة']);
+    invt.forEach(i=>rows.push([i.id,i.name,i.qty,i.buy,i.sell,i.min,i.qty<=i.min?'منخفض':'طبيعي']));
+  }
+  const csv='\uFEFF'+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=fn;a.click();
+  toast('✅ تم تصدير الملف');
+}
+function printReport(){
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"/><title>تقرير الأجهزة</title>
+  <style>body{font-family:Tahoma,Arial,sans-serif;direction:rtl;padding:20px;color:#111}h1{font-size:20px;margin-bottom:3px}p{color:#666;font-size:12px;margin-bottom:14px}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#1E1E35;color:#fff;padding:9px 7px;text-align:right}td{padding:7px;border-bottom:1px solid #eee}.ft{margin-top:16px;font-size:11px;color:#999;text-align:center}</style>
+  </head><body><h1>🔧 ${cfg.name}</h1><p>📞 ${cfg.phone} | ${cfg.addr} | ${today()}</p>
+  <table><thead><tr><th>الجهاز</th><th>IMEI</th><th>العميل</th><th>الهاتف</th><th>الأعطال</th><th>الحالة</th><th>الفني</th><th>التاريخ</th><th>المجموع</th></tr></thead><tbody>
+  ${devs.map(d=>{const c=custs.find(x=>x.id===d.cid);const s=ST[d.status];return`<tr><td>${d.type} ${d.model}</td><td>${d.imei}</td><td>${c?.name||'—'}</td><td>${c?.phone||'—'}</td><td>${d.faults?.join('، ')||'—'}</td><td>${s?.ic} ${s?.lbl}</td><td>${d.tech}</td><td>${d.recv}</td><td style="font-weight:700;color:green">${fmt(devTotal(d))} DA</td></tr>`;}).join('')}
+  </tbody></table>
+  <div class="ft">إجمالي: ${devs.length} جهاز | تم إصلاحها: ${devs.filter(d=>d.status==='done').length}</div>
+  <script>window.onload=()=>window.print()<\/script></body></html>`);
+  w.document.close();
+}
+
+// ══════════════════════════════════
+//  DEVICE FORM
+// ══════════════════════════════════
+let curStep=1, selFaults=[], formParts=[], editId=null, custMode='new';
+
+function openDevModal(id=null){
+  editId=id;curStep=1;selFaults=[];formParts=[];
+  $id('M_DEV_TITLE').textContent=id?'📱 تعديل جهاز':'📱 تسجيل جهاز جديد';
+  const d=id?devs.find(x=>x.id===id):null;
+  const c=d?custs.find(x=>x.id===d.cid):null;
+  $id('F_CN').value=c?.name||'';$id('F_CP').value=c?.phone||'';$id('F_CE').value=c?.email||'';
+  $id('F_DT').value=d?.type||'iPhone';$id('F_DM').value=d?.model||'';
+  $id('F_DC').value=d?.color||'';$id('F_DI').value=d?.imei||'';
+  $id('F_NO').value=d?.notes||'';$id('F_SV').value=d?.svc||0;
+  $id('F_ST').value=d?.status||'rep';
+  $id('F_RD').value=d?.recv||today();$id('F_DD').value=d?.dlvr||tmrw();
+  $id('F_TK').innerHTML=techs().map(t=>`<option${d?.tech===t?' selected':''}>${t}</option>`).join('');
+  $id('F_CS').innerHTML='<option value="">-- اختر --</option>'+custs.map(c=>`<option value="${c.id}">${c.name} - ${c.phone}</option>`).join('');
+  if(d){selFaults=[...(d.faults||[])];formParts=JSON.parse(JSON.stringify(d.parts||[]));}
+  setCMode('new');renderChips();renderParts();calcSum();gStep(1);
+  $id('M_DEV').style.display='flex';
+}
+function setCMode(m){
+  custMode=m;
+  $id('NEW_C').style.display=m==='new'?'block':'none';
+  $id('EXIST_C').style.display=m==='exist'?'block':'none';
+  $id('BNC').className='btn btn-sm '+(m==='new'?'btn-acc':'btn-ghost');
+  $id('BEC').className='btn btn-sm '+(m==='exist'?'btn-acc':'btn-ghost');
+}
+function renderChips(){
+  $id('CHIPS').innerHTML=FAULTS.map(f=>`<button class="chip${selFaults.includes(f)?' on':''}" onclick="togFault('${f}')">${f}</button>`).join('');
+}
+function togFault(f){selFaults=selFaults.includes(f)?selFaults.filter(x=>x!==f):[...selFaults,f];renderChips();}
+function addPart(){formParts.push({name:'',qty:1,buy:0,sell:0});renderParts();}
+function renderParts(){
+  $id('PARTS_LIST').innerHTML=formParts.map((p,i)=>`<div class="prow"><div class="prow-g">
+    <div><label class="pl">القطعة</label>
+      <select class="pi" onchange="selPart(${i},this.value)">
+        <option value="">-- اختر --</option>
+        ${PARTS_CAT.map(x=>`<option value="${x.name}"${p.name===x.name?' selected':''}>${x.name}</option>`).join('')}
+        <option value="أخرى"${p.name==='أخرى'?' selected':''}>أخرى</option>
+      </select></div>
+    <div><label class="pl">الكمية</label><input class="pi" type="number" min="1" value="${p.qty}" oninput="updPart(${i},'qty',this.value)"/></div>
+    <div><label class="pl">شراء DA</label><input class="pi" type="number" value="${p.buy}" oninput="updPart(${i},'buy',this.value)"/></div>
+    <div><label class="pl">بيع DA</label><input class="pi" type="number" value="${p.sell}" oninput="updPart(${i},'sell',this.value)"/></div>
+    <button class="btn btn-red btn-sm" onclick="rmPart(${i})" style="margin-top:16px">✕</button>
+  </div></div>`).join('');
+  calcSum();
+}
+function selPart(i,n){const x=PARTS_CAT.find(p=>p.name===n);formParts[i]={...formParts[i],name:n,buy:x?.buy||formParts[i].buy,sell:x?.sell||formParts[i].sell};renderParts();}
+function updPart(i,k,v){formParts[i]={...formParts[i],[k]:parseFloat(v)||0};calcSum();}
+function rmPart(i){formParts.splice(i,1);renderParts();}
+function calcSum(){
+  const pr=formParts.reduce((s,p)=>s+(parseFloat(p.sell||0)*parseInt(p.qty||0)),0);
+  const pc=formParts.reduce((s,p)=>s+(parseFloat(p.buy||0)*parseInt(p.qty||0)),0);
+  const sv=parseFloat($id('F_SV')?.value||0);
+  const gr=pr+sv;const pf=gr-pc;
+  if($id('S_PARTS'))$id('S_PARTS').textContent=fmt(pr);
+  if($id('S_COST'))$id('S_COST').textContent=fmt(pc);
+  if($id('S_PROF')){$id('S_PROF').textContent=fmt(pf);$id('S_PROF').style.color=pf>=0?'var(--grn)':'var(--red)';}
+  if($id('S_TOTAL'))$id('S_TOTAL').textContent=fmt(gr)+' DA';
+}
+function gStep(n){
+  curStep=n;
+  [1,2,3].forEach(s=>{
+    $id('SC'+s).style.display=s===n?'block':'none';
+    const dot=$id('SD'+s);dot.className='step'+(s===n?' on':s<n?' done':'');dot.textContent=s<n?'✓':s;
+  });
+  $id('M_BACK').textContent=n===1?'إلغاء':'← السابق';
+  $id('M_NEXT').style.display=n<3?'inline-flex':'none';
+  $id('M_SAVE').style.display=n===3?'inline-flex':'none';
+  if(n===3){
+    const sv=parseFloat($id('F_SV')?.value||0);
+    const gr=formParts.reduce((s,p)=>s+(p.sell*p.qty),0)+sv;
+    $id('S3_SUM').innerHTML=`<div style="font-weight:700;margin-bottom:9px">📋 ملخص</div>
+      <div style="display:grid;gap:6px;font-size:13px">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--mut)">الجهاز</span><span>${$id('F_DT').value} ${$id('F_DM').value}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--mut)">IMEI</span><span class="mono" style="font-size:11px">${$id('F_DI').value}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--mut)">الأعطال</span><span>${selFaults.join('، ')||'—'}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--mut)">الفني</span><span>${$id('F_TK').value}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:800;border-top:1px solid var(--bor);padding-top:8px;margin-top:4px">
+          <span>المجموع</span><span class="mono c-acc">${fmt(gr)} DA</span>
+        </div>
+      </div>`;
+  }
+}
+function stepBack(){if(curStep===1){cls('M_DEV');editId=null;}else gStep(curStep-1);}
+function stepNext(){if(curStep<3)gStep(curStep+1);}
+function saveDevice(){
+  const model=$id('F_DM').value.trim();const imei=$id('F_DI').value.trim();
+  if(!model||!imei){toast('⚠️ أكمل الموديل و IMEI','var(--yel)');return;}
+  let cid;
+  if(custMode==='exist'){
+    cid=parseInt($id('F_CS').value);if(!cid){toast('⚠️ اختر عميلاً','var(--yel)');return;}
+  } else {
+    const n=$id('F_CN').value.trim();const p=$id('F_CP').value.trim();
+    if(!n||!p){toast('⚠️ أدخل اسم ورقم العميل','var(--yel)');return;}
+    const ex=custs.find(c=>c.phone===p);
+    if(ex){cid=ex.id;}else{const nc={id:Date.now(),name:n,phone:p,email:$id('F_CE').value.trim(),cr:today()};custs.push(nc);cid=nc.id;}
+  }
+  const d={
+    id:editId||Date.now(),cid,type:$id('F_DT').value,model,color:$id('F_DC').value,imei,
+    faults:[...selFaults],notes:$id('F_NO').value,
+    parts:JSON.parse(JSON.stringify(formParts)),
+    svc:parseFloat($id('F_SV').value)||0,
+    status:$id('F_ST').value,tech:$id('F_TK').value,
+    recv:$id('F_RD').value,dlvr:$id('F_DD').value,
+    cr:editId?devs.find(x=>x.id===editId)?.cr:today(),
+  };
+  if(editId)devs=devs.map(x=>x.id===editId?d:x);else devs.unshift(d);
+  persist();cls('M_DEV');editId=null;
+  toast(editId?'✅ تم التعديل':'✅ تم حفظ الجهاز');
+  if(curPage==='devs')renderDevs();else if(curPage==='dash')renderDash();
+  updAlerts();
+}
+
+// ══════════════════════════════════
+//  INIT
+// ══════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  initLogin();
+  $id('L_PASS').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+  $id('L_USER').addEventListener('keydown',e=>{if(e.key==='Enter')$id('L_PASS').focus();});
+  $id('N_bck').addEventListener('click',()=>$id('M_BCK').style.display='flex');
+});
+</script>
+</body>
+</html>
